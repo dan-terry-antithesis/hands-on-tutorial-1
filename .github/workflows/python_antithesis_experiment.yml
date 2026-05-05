@@ -70,3 +70,4 @@ jobs:
 
       - name: "Launch single experiment"
         run: ./python/antithesis/scripts/launch_experiment.sh "${INPUT_DURATION}" "${IMAGES_PREFIX}-config:${IMAGES_TAG}" "${INPUT_DESCRIPTION}" "${INPUT_EMAIL}"
+
