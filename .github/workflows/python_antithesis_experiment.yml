@@ -1,15 +1,10 @@
 name: Antithesis - Python Echo Server
 
 env:
-  WEBHOOK_CREDENTIALS: ${{ secrets.ANTITHESIS_USER_NAME }}:${{ secrets.ANTITHESIS_PASSWORD }}
   REGISTRY: us-central1-docker.pkg.dev
   REPOSITORY: us-central1-docker.pkg.dev/molten-verve-216720/${{ vars.ANTITHESIS_REPOSITORY_NAME }}-repository
-  TENANT_DOMAIN: ${{ vars.ANTITHESIS_TENANT_DOMAIN }}
   IMAGES_PREFIX: python-echo-server
   IMAGES_TAG: ${{ github.run_number }}_${{github.sha}}
-  INPUT_DURATION: ${{ github.event.inputs.duration }}
-  INPUT_DESCRIPTION: ${{ github.event.inputs.description }}
-  INPUT_EMAIL: ${{ github.event.inputs.email }}
 
 on:
   workflow_dispatch:
@@ -68,5 +63,18 @@ jobs:
           tags: ${{ env.REPOSITORY }}/${{ env.IMAGES_PREFIX }}-sut:${{ env.IMAGES_TAG }}
           push: true
 
-      - name: "Launch single experiment"
-        run: ./python/antithesis/scripts/launch_experiment.sh "${INPUT_DURATION}" "${IMAGES_PREFIX}-config:${IMAGES_TAG}" "${INPUT_DESCRIPTION}" "${INPUT_EMAIL}"
+      # antithesis.source is set to include the GitHub user that initiated the action. This will cause Antithesis Findings to
+      # calculate separately for each user that attempts the tutorial, which is desired.
+      - uses: antithesishq/antithesis-trigger-action@v0.8
+        with:
+          notebook_name: basic_test
+          tenant: ${{ vars.ANTITHESIS_TENANT_NAME }}
+          username: ${{ secrets.ANTITHESIS_USERNAME }}
+          password: ${{ secrets.ANTITHESIS_PASSWORD }}
+          github_token: ${{ secrets.ANTITHESIS_GH_PAT }}
+          config_image: ${{ env.REPOSITORY }}/${{ env.IMAGES_PREFIX }}-config:${{ env.IMAGES_TAG }}
+          description: ${{ github.event.inputs.description }}
+          email_recipients: ${{ github.event.inputs.email }}
+          additional_parameters: |-
+            antithesis.duration=${{ github.event.inputs.duration }}
+            antithesis.source=tutorial-1-${{ github.actor }}
