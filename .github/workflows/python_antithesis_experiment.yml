@@ -65,7 +65,7 @@ jobs:
 
       # antithesis.source is set to include the GitHub user that initiated the action. This will cause Antithesis Findings to
       # calculate separately for each user that attempts the tutorial, which is desired.
-      - uses: antithesishq/antithesis-trigger-action@v0.8
+      - uses: antithesishq/antithesis-trigger-action@c3766c5bf78a26925f06ffffc6e9ea84925933c7
         with:
           notebook_name: basic_test
           tenant: ${{ vars.ANTITHESIS_TENANT_NAME }}
